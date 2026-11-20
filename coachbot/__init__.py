@@ -1,0 +1,1 @@
+"""CoachBot AI core package."""

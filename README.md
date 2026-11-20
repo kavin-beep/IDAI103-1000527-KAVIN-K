@@ -1,233 +1,273 @@
-# CoachBot AI
+<div align="center">
 
-<p align="center">
-  <img alt="Animated CoachBot tagline" src="https://readme-typing-svg.demolab.com?font=Inter&weight=600&size=22&duration=2800&pause=700&color=37B878&center=true&vCenter=true&width=720&lines=Sports+and+wellness+conversation;A+careful+practice-plan+companion;Built+with+Streamlit+%2B+Groq" />
-</p>
+<img src="docs/assets/screens/01-arena-hero.jpg" alt="CoachBot AI — 3D holographic hero" width="100%">
 
-<p align="center">
-  <a href="https://streamlit.io/"><img alt="Streamlit" src="https://img.shields.io/badge/UI-Streamlit-ff4b4b?logo=streamlit&logoColor=white"></a>
-  <a href="https://groq.com/"><img alt="Groq" src="https://img.shields.io/badge/AI-Groq-111111"></a>
-  <img alt="Python" src="https://img.shields.io/badge/Python-3.13-3776ab?logo=python&logoColor=white">
-  <img alt="Status" src="https://img.shields.io/badge/status-coursework%20prototype-24724b">
-</p>
+# ⚡ CoachBot AI
 
-> CoachBot is a youth-sports prototype for asking sports and general-wellness questions, continuing a conversation, and requesting general practice plans. English is the default. Each plan suggestion carries a short rationale.
+### A generative-AI virtual coach for the next generation of athletes
 
-**Important:** CoachBot is not a doctor, physiotherapist, or qualified coach. It does not diagnose, prescribe treatment, or clear a player to return to sport. Personal injury and urgent-symptom requests are routed to fixed local guidance instead of being sent to Groq. Ask a qualified adult or professional for personal health and recovery decisions.
+<img alt="typing" src="https://readme-typing-svg.demolab.com?font=Unbounded&weight=700&size=20&duration=2600&pause=600&color=C6FF3D&center=true&vCenter=true&width=760&lines=Position-based+workouts;Injury-safe+training+plans;Tactical+IQ+%2B+decision+drills;7-day+fuel+plans+%2B+hydration;Tournament+mindset+%2B+visualisation">
 
-## Project at a glance
+<a href="https://streamlit.io"><img src="https://img.shields.io/badge/UI-Streamlit-FF4B4B?logo=streamlit&logoColor=white"></a>
+<a href="https://ai.google.dev"><img src="https://img.shields.io/badge/AI-Google%20Gemini-4285F4?logo=google&logoColor=white"></a>
+<img src="https://img.shields.io/badge/3D-Three.js-000?logo=threedotjs">
+<img src="https://img.shields.io/badge/charts-Plotly-3F4F75?logo=plotly">
+<img src="https://img.shields.io/badge/tests-38%20passing-C6FF3D">
+<img src="https://img.shields.io/badge/Scenario-2%20·%20Smart%20Fitness-9D7BFF">
 
-| Item | Details |
+**[▶ Live app](#-run-it)** · **[🌐 Landing site](https://kavin-beep.github.io/GENAI-SA/)** · **[📚 Prompts](research/PROMPTS.md)** · **[🔬 Research](research/RESEARCH.md)** · **[🧪 Validation](research/VALIDATION.md)** · **[📓 Notebook](notebooks/coachbot_exploration.ipynb)**
+
+</div>
+
+> **Summative Assessment — Generative AI · Scenario 2: Smart Fitness Assistance Web App (NextGen Sports Lab)**
+> CoachBot gives young athletes position-based workouts, injury-aware plans, tactical coaching, nutrition, hydration and mindset support. Plans are personalised by Google Gemini and wrapped in a 3D, game-style interface.
+
+---
+
+## 📑 Contents
+
+1. [Problem & research](#1--problem--research)
+2. [Solution design](#2--solution-design)
+3. [The 13 AI features (prompts)](#3--the-13-ai-features-prompt-engineering)
+4. [Model, hyperparameters & tuning](#4--model-hyperparameters--tuning)
+5. [Output format & reasoning](#5--output-format--reasoning)
+6. [Testing, validation & results](#6--testing-validation--results)
+7. [UI/UX — the Neon Stadium design system](#7--uiux--the-neon-stadium-design-system)
+8. [Run it / deploy it](#-run-it)
+9. [Repository map](#-repository-map)
+10. [Screenshots](#-screenshots)
+
+---
+
+## 1 · Problem & research
+
+Many aspiring athletes, especially in under-resourced regions, train without a coach, physio or nutritionist. What they find online is **position-blind, injury-blind, resource-blind and not designed for minors**.
+
+Key research findings and how each one shaped the app (full notes and references in [research/RESEARCH.md](research/RESEARCH.md)):
+
+| Finding | Influence on CoachBot |
 |---|---|
-| App | [CoachBot AI](app.py) |
-| Interface | Streamlit chat, conversation history, profile/settings, day/night appearance |
-| Model service | Groq Chat Completions through `requests` |
-| Default model | `openai/gpt-oss-20b` in `config.py`; availability must be checked for your key |
-| Structured output | Pydantic contracts in `core/schemas.py`; JSON schema is sent to Groq |
-| Optional account login | Streamlit OpenID Connect; Google can provide identity |
-| Optional cross-session memory | Supabase REST storage, configured by the app owner |
-| English | Default response language; another language must be selected |
-| Assessment content | Student-owned research, prompt variants, testing findings, and personal reflections remain marked `[MY INPUT NEEDED]` where they must be completed by the student |
+| Youth Physical Development Model (Lloyd & Oliver, 2012): technique-first, age-appropriate loading | Automatic age constraints: under-13 = bodyweight & play, 13–15 = light technique-first loading |
+| FIFA 11+ warm-ups reduce youth injuries (Soligard et al., 2008, BMJ) | Warm-Up feature uses the RAMP structure and FIFA 11+-style prevention work |
+| Common youth injuries need specific modifications (NCBI NBK566046) | 12 injury rule sets become "avoid / prefer" constraints in every prompt |
+| PETTLEP imagery model (Holmes & Collins, 2001) | Pre-Match Visualisation scripts follow PETTLEP |
+| WHO oral rehydration guidance | Hydration feature suggests low-cost homemade electrolytes for hot climates |
+| Gemini prompting strategies (Google) | Persona + task + structured context + constraints + JSON schema in every request |
+| Food-first nutrition for young athletes (eatright.org) | No supplements or weight-cutting; portions in hands/cups; regional cuisine and budget inputs |
 
-## Animated request flow
+**Objectives:** empower youth with AI-based personal training · adapt routines to position and physical condition · promote safety, motivation and nutrition awareness · stay accessible in low-resource settings (zero-equipment mode, budget meals, 14 languages, works on mobile).
+
+## 2 · Solution design
 
 ```mermaid
 flowchart LR
-    U[Chat message] --> L[Local input and safety checks]
-    L -->|safe to generate| C[Conversation context]
-    C --> G[Groq request with JSON schema]
-    G --> V[Validate schema and screen response]
-    V --> R[Render answer or plan with rationales]
-    R -->|only if requested| D[Markdown download]
-    L -->|injury, urgent, or disallowed request| N[Fixed local safety guidance]
+    A[🧬 Athlete profile<br/>sport · position · age · injuries<br/>diet · equipment · goal · tone] --> B{🛡️ Safety screen}
+    B -- red flag / unsafe request --> X[🚑 Stop & refer to a professional]
+    B -- ok + hard constraints --> C[🧩 Prompt builder<br/>system persona + feature template]
+    C --> D[🤖 Gemini<br/>JSON schema · tuned temp/top_p/top_k<br/>retries + back-off]
+    D --> E[✅ Pydantic validation<br/>+ output safety scan]
+    E --> F[🎨 Cards · 3D charts · tables<br/>downloads · XP · feedback]
+    D -. every call .-> L[(📜 JSONL logs)]
+    F -. 👍/👎 .-> L
+    L --> T[🧪 Tuning Lab + Logs tab + eval harness]
 ```
 
-The diagram separates what happens before and after the model call. A blocked request is handled locally. A model response is not displayed until parsing, schema validation, and the app's limited output checks finish. These checks reduce some failure modes; they do not prove factual accuracy or medical safety.
+| Layer | File | What it does |
+|---|---|---|
+| UI | [`app.py`](app.py), [`ui/`](ui) | Streamlit app with 5 tabs, sidebar profile, XP system, CSS design system, WebGL/Three.js effects |
+| Prompts | [`coachbot/features.py`](coachbot/features.py), [`coachbot/prompts.py`](coachbot/prompts.py) | 13 versioned prompt templates, system persona, profile block |
+| Model | [`coachbot/gemini_client.py`](coachbot/gemini_client.py) | `google-genai` SDK, structured JSON output, retries, error mapping, logging |
+| Safety | [`coachbot/safety.py`](coachbot/safety.py) | Red-flag symptoms, blocked requests, injury/age/allergy constraints, output scan |
+| Schema | [`coachbot/schema.py`](coachbot/schema.py) | `CoachPlan` Pydantic contract shared by Gemini, demo engine and UI |
+| Charts | [`coachbot/charts.py`](coachbot/charts.py) | Plotly: weekly load, **3D effort landscape**, radar, macro donut, **3D sampling scatter** |
+| Demo | [`coachbot/demo.py`](coachbot/demo.py) | Offline rule-based engine so the app works without a key (clearly labelled DEMO) |
 
-## What the app does
+## 3 · The 13 AI features (prompt engineering)
 
-- Provides a ChatGPT-style chat landing page, New chat action, recent chat list, and Settings screen.
-- Answers sports and general-wellness questions, follows up using earlier conversation turns, and can draft general sports practice plans.
-- Renders a concise rationale under each structured plan suggestion.
-- Offers a Markdown file only when the user asks for a Markdown/`.md` download.
-- Lets a user save a profile (name, broad age range, sport, position, experience, goal, equipment, and coaching preferences), choose a response language, tone, and answer length, and control whether saved details are included in model requests.
-- Supports local theme changes. The app's own theme styling synchronizes the Streamlit page colors with the selected day/night palette.
-- Recognizes a small allowlist of settings commands in chat and applies those locally without a model request.
+The brief requires at least 10 prompts or features. CoachBot ships **13**: the 5 examples from the brief plus 8 self-created ones. All are listed in full in **[research/PROMPTS.md](research/PROMPTS.md)**.
 
-### What it deliberately does not do
+| # | Feature | Type | Temp | top_p | top_k | Example prompt intent |
+|---|---|---|---|---|---|---|
+| 1 | 🏋️ Position Workout | brief | 0.4 | 0.9 | 40 | "Generate a full-body workout plan for a **[position]** in **[sport]**" + position demands + 4-week progression |
+| 2 | 🩹 Injury-Safe Recovery | brief | 0.2 | 0.8 | 20 | "Create a safe recovery training schedule for an athlete with **[injury]**" — phases, AVOID list, stop signs |
+| 3 | 🧠 Tactical IQ Coach | brief | 0.7 | 0.95 | 40 | "Provide tactical coaching tips to improve **[skill]** in **[sport]**" — if-this→do-that scenarios |
+| 4 | 🥗 7-Day Fuel Plan | brief | 0.6 | 0.9 | 40 | "Suggest a week-long nutrition guide for a **[age]**-year-old following a **[diet]**" + budget + regional cuisine |
+| 5 | 🔥 Warm-Up & Cool-Down | brief | 0.3 | 0.85 | 30 | "Personalised warm-up and cooldown for **[sport and position]**" (RAMP) |
+| 6 | 🧘 Tournament Mindset | self | 0.8 | 0.95 | 50 | Countdown routine, breathing, cue word, 10-second mistake reset |
+| 7 | 💧 Hydration & Electrolytes | self | 0.4 | 0.85 | 30 | Climate-aware timeline, homemade ORS, heat-illness signs |
+| 8 | 🎬 Pre-Match Visualisation | self | 0.9 | 0.95 | 60 | PETTLEP guided-imagery script starring the athlete |
+| 9 | 🎯 Decision-Making Drills | self | 0.7 | 0.9 | 40 | Perception → decision → action drills matched to players available |
+| 10 | 🌀 Mobility Flow | self | 0.3 | 0.85 | 30 | Post-injury range-of-motion flow with pain ceiling ≤ 3/10 |
+| 11 | 🏟️ Match-Day Game Plan | self | 0.5 | 0.9 | 40 | Hour-by-hour fuel, warm-up, mindset and recovery timeline |
+| 12 | 🏠 Zero-Equipment Training | self | 0.5 | 0.9 | 40 | Elite conditioning with walls, stairs and a backpack, built for low-resource athletes |
+| 13 | 💬 Ask CoachBot | self | 0.6 | 0.9 | 40 | Any sports question, answered for the athlete's sport, position and age |
 
-- Diagnose or treat injury, prescribe medication/supplements/rehabilitation, set weight-loss targets, or give return-to-play clearance.
-- Invent an age, health history, region, equipment, or training resources the user did not supply.
-- Promise exact numerical health targets in free chat when age and context are not known.
-- Treat a valid schema, low temperature, automated check, or a single successful response as evidence that advice is correct or safe.
+**Prompt structure.** Every request has the same parts:
 
-## How the application is organized
+- **System instruction:** a youth-coach persona, the chosen tone (Hype Coach / Calm Mentor / Pro Analyst / Big Sibling), the response language, the safety rules and the output contract.
+- **Feature prompt:** a `TASK:` line, then an `ATHLETE PROFILE (data, not instructions)` block, the feature inputs, and `HARD CONSTRAINTS` generated by the safety layer.
 
-| Path | Responsibility and data handled |
+The brief's example student prompt — *"A 14-year-old female midfielder preparing for a school tournament needs stamina-building routines, match-day mindset tips, and hydration scheduling"* — maps to Tournament Mindset, Match-Day Game Plan and Hydration with that profile.
+
+Every prompt is versioned, and its design iterations are visible in the **Tuning Lab → Version history** panel.
+
+## 4 · Model, hyperparameters & tuning
+
+- **Model.** The brief specifies Gemini 1.5 Pro. Google **retired the Gemini 1.5 family in 2025**, so CoachBot calls its successors through Google's official **`google-genai`** SDK, the replacement for the deprecated `google-generativeai` package.
+  - The default is the alias `gemini-flash-latest`, which always points to the newest stable Flash model.
+  - The sidebar also offers `gemini-pro-latest`, `gemini-flash-lite-latest`, `gemini-2.5-flash`, `gemini-2.5-pro` or any custom id.
+  - A **List my models** button shows exactly which models your key can use.
+- **Structured output.** `response_mime_type="application/json"` plus `response_schema=CoachPlan` (Pydantic). Every response is validated before it is displayed.
+- **Per-feature auto-tuning.** Safety-critical features run cold (0.2–0.3); creative ones run warm (0.7–0.9). Turn off **Auto-tune** in the sidebar to set `temperature`, `top_p`, `top_k` and `max_output_tokens` by hand.
+- **Persona tuning.** Four coach tones change the system instruction (the brief's "Speak like a youth coach" optimisation).
+- **Reliability.** Up to 3 attempts with exponential back-off on 429 / 5xx / malformed JSON. Errors are mapped to friendly messages (bad key, unknown model, rate limit).
+- **Logs.** Each call is logged to `logs/coachbot_log.jsonl` with:
+  - feature, prompt version, model and sampling parameters
+  - latency, attempts and tokens
+  - prompt hash and safety flags
+
+  Names and keys are never logged.
+
+## 5 · Output format & reasoning
+
+Gemini returns a `CoachPlan`:
+
+```json
+{
+  "headline": "Comeback Season, Ravi",
+  "summary": "A conservative plan for a 15-year-old fast bowler recovering from a knee strain…",
+  "sections": [{"title": "Movements to avoid", "icon": "⛔", "items": ["Deep loaded squats…", "…"]}],
+  "weekly_plan": [{"day": "Mon", "focus": "Pool cardio", "duration_min": 30, "intensity": 3, "details": "…"}],
+  "focus_areas": [{"name": "Recovery", "score": 10}, {"name": "Mobility", "score": 9}],
+  "macros": null,
+  "safety_notes": ["Stop if you feel sharp pain or swelling…"],
+  "coach_message": "Every rep is a step back to the crease."
+}
+```
+
+The app turns this into:
+
+- animated section cards
+- a coach speech bubble
+- a schedule table with intensity bars
+- a **weekly load chart**, a **3D effort landscape** (Plotly surface), a focus **radar** and a macro **donut**
+- a 🛡️ safety panel
+- Markdown / JSON / CSV downloads
+- 👍/👎 feedback, which is logged for prompt tuning
+
+The **Prompt inspector** shows the exact system instruction and prompt that were sent.
+
+## 6 · Testing, validation & results
+
+Full details are in [research/VALIDATION.md](research/VALIDATION.md).
+
+| What | How | Result |
+|---|---|---|
+| Unit tests | `python -m pytest -q` — templates, safety, parsing, every feature end to end | **38 / 38 passing** |
+| Eval harness | `python -m eval.run_eval` — 10 athlete cases (incl. multi-injury, under-13, vegan + allergy, red flags) × temperatures × top_p, scored for relevance, safety and structure | Demo engine: **30 / 30** after fixes (the first run found 3 real bugs, documented) |
+| Live Gemini evaluation | Same harness with `GEMINI_API_KEY` set | ✍️ *Add your results table here after running with your key* |
+| Tuning Lab | Side-by-side temperature comparison in the app | Charts of length, lexical variety, latency and safety flags |
+| Edge cases | Chest pain, concussion signs, steroid requests, rapid weight loss, 3+ injuries, unusual calorie goals | Blocked or constrained before the model is called |
+
+> Demo-engine scores validate the pipeline and the safety layer. They are not a measure of Gemini's output quality, so add the live results before submission.
+
+## 7 · UI/UX — the Neon Stadium design system
+
+The design is built like a game launcher, not a form:
+
+- **WebGL aurora shader background:** an fbm noise mesh gradient plus a scrolling neon perspective grid that follows the cursor. It is injected into the Streamlit page.
+- **Three.js holographic hero:** wireframe icosahedron "ball", fresnel-glow core, orbit rings with satellites, a 3,200-particle galaxy, a scrolling shader floor, light-streak "running lanes", **UnrealBloom** post-processing, mouse parallax and click shockwaves.
+- **Game feel:**
+  - click-spark particles on every click
+  - confetti when a plan is generated
+  - **XP, levels and 6 unlockable category badges**
+  - toasts
+- **Cards:**
+  - glassmorphism
+  - animated conic "border beams" (Magic UI style)
+  - mouse-tracked 3D tilt with spotlight (Aceternity style)
+  - CSS `@property` number tickers
+  - marquee band
+  - flowing pipeline steps
+- **Accessibility:** a mobile-responsive layout and `prefers-reduced-motion` support.
+- **Landing site** ([`docs/index.html`](docs/index.html), for GitHub Pages): a separate page built with the same design language.
+  - a **14,000-particle Three.js field that morphs sphere → football → DNA helix → galaxy as you scroll**, with mouse repulsion and bloom
+  - **GSAP ScrollTrigger** and **Lenis** smooth scroll
+  - a preloader with curtain reveal, split-letter headline and text scramble
+  - a pinned horizontal feature reel, an SVG pipeline that draws on scroll, and a typing JSON terminal
+  - a draggable **temperature visualiser**
+  - magnetic buttons and a custom cursor
+
+## ▶ Run it
+
+```powershell
+git clone https://github.com/kavin-beep/GENAI-SA.git
+```
+
+```powershell
+cd GENAI-SA; pip install -r requirements.txt
+```
+
+```powershell
+streamlit run app.py
+```
+
+**Gemini API key.** Create one at [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey). Then either:
+
+- copy `.streamlit/secrets.toml.example` → `.streamlit/secrets.toml` and set `GEMINI_API_KEY`, **or**
+- paste the key into the sidebar (it is kept for that session only).
+
+Without a key the app runs in **demo mode**, so every screen still works.
+
+**Deploy to Streamlit Community Cloud:**
+
+1. Go to [share.streamlit.io](https://share.streamlit.io) → *New app* → pick this repo, branch `main`, file `app.py`.
+2. In *Advanced settings → Secrets*, add `GEMINI_API_KEY = "…"`.
+3. Deploy, then put the URL into the "Live app" link above and into `APP_URL` in `docs/index.html`.
+
+**Landing site:** in repo *Settings → Pages*, choose *Deploy from a branch → `main` / `/docs`*. It will be live at `https://kavin-beep.github.io/GENAI-SA/`.
+
+**Tests & evaluation:**
+
+```powershell
+python -m pytest -q
+```
+
+```powershell
+python -m eval.run_eval --temps 0.2 0.5 0.9
+```
+
+## 🗂 Repository map
+
+```
+app.py                     Streamlit app (5 tabs: Arena · CoachBot · Tuning Lab · Logs & Validation · Research)
+coachbot/                  config · features (13 prompts) · prompts · gemini_client · safety · schema · charts · demo · logger
+ui/                        styles (design system CSS) · fx (WebGL shader, Three.js hero, confetti) · render (HTML components)
+eval/                      test_cases.json · run_eval.py · results/ (CSV evidence)
+tests/                     test_core.py (38 offline tests)
+notebooks/                 coachbot_exploration.ipynb (pipeline walkthrough + temperature experiment)
+research/                  RESEARCH.md · PROMPTS.md (all prompts) · VALIDATION.md
+docs/                      index.html (3D landing site for GitHub Pages) · assets/screens/
+submission/                cover page
+```
+
+## 📸 Screenshots
+
+| | |
 |---|---|
-| `app.py` | Starts Streamlit, establishes auth/account state, renders navigation and chat/settings, and persists account state when configured. |
-| `config.py` | Central defaults and bounds: model, English language, generation settings, evaluation grid and cache paths. |
-| `ui/chat.py` | Chat page, current/recent conversation rendering, prompt entry, settings commands, and download request behavior. |
-| `ui/screens.py` | Sign-in and Settings screens; profile fields and preference controls. |
-| `ui/auth.py` | Detects valid Streamlit OpenID Connect configuration. Google handles the user's password; CoachBot receives identity claims, not the Gmail password. |
-| `ui/controller.py` | Connects user submissions to local preflight, Groq generation, response formatting, feedback and downloads. |
-| `ui/account_memory.py` | Serializes, validates, merges and restores chat/profile/preferences for a verified account. Builds an account key from a hash of the identity subject. |
-| `ui/theme.py` | Day/night CSS and the animated particle illustration. |
-| `ui/components.py` | Shared session initialization and form/control helpers. |
-| `core/safety.py` | Input preflight, data constraints, local safety replies, and limited response screening. |
-| `core/groq_client.py` | Groq HTTP request, JSON-schema response mode, bounded retries/repair, call budget, timeout and response cache. |
-| `core/schemas.py` | Strict Pydantic models for requests, chat answers, plan recommendations and attempt records. Extra fields are rejected; recommendation rationale is required. |
-| `core/formatter.py` | Converts validated responses into display plans and optional Markdown content. |
-| `core/prompts.py` | Versioned, typed prompt registry. One worked prompt is registered; the other assessment prompt slots are intentionally unfinished. |
-| `core/feedback.py` | Minimal feedback vote records; does not store the user's full chat text in the vote record. |
-| `core/supabase_store.py` | Server-side Supabase REST reads/writes for account memory. |
-| `supabase/setup.sql` | Creates the account-memory table and database permissions/RLS policy setup. |
-| `eval/eval_runner.py` | Builds evaluation jobs, runs dry-run plans, enforces call caps, checkpoints progress and exports CSV summaries. |
-| `eval/cases.synthetic.json` | Synthetic engineering cases; these are not real user research or student findings. |
-| `eval/cases.student.template.json` | Empty template for student-authored evaluation cases. |
-| `notebooks/exploration.ipynb` | Small companion notebook importing core code for connectivity, parameter-sweep and schema examples. |
-| `tests/` | Offline contract, safety, caching, persistence, formatting and evaluation tests. Passing offline tests is not live-provider or deployment validation. |
-| `docs/` and `STAGE_*.md` | Evidence plan, prompt authoring, evaluation rubric, staged implementation notes, and submission guidance. |
+| ![Arena hero](docs/assets/screens/01-arena-hero.jpg) **Arena** — Three.js holographic hero with bloom | ![Feature grid](docs/assets/screens/02-feature-grid.jpg) **The Playbook** — 13 tilt cards with border beams |
+| ![Plan result](docs/assets/screens/03-plan-result.jpg) **Generated plan** — personalised section cards | ![Charts](docs/assets/screens/04-plan-charts-3d.jpg) **Charts** — weekly load, 3D effort landscape, schedule |
+| ![Safety](docs/assets/screens/05-safety-block.jpg) **Safety** — red-flag symptoms are stopped before the AI | ![Tuning Lab](docs/assets/screens/06-tuning-lab.jpg) **Tuning Lab** — temperatures side by side |
+| ![Logs](docs/assets/screens/07-logs-validation.jpg) **Logs & Validation** — latency timeline + 3D sampling scatter | ![Landing](docs/assets/screens/09-landing-hero.jpg) **Landing site** — morphing 14k-particle field |
 
-## Data and privacy map
+> 📌 **Still to add for submission:** a screenshot of your Gemini API key page in Google AI Studio (hide the key), your Streamlit Cloud URL, and your live-Gemini evaluation table.
 
-| Data | Source | Where it is used or stored | Important boundary |
-|---|---|---|---|
-| Current user message | Chat input | Local safety preflight; if eligible, included in a Groq request | Local injury/urgent routing can stop before Groq |
-| Earlier user/assistant turns | Active and recent conversation history | Bounded conversational context sent with eligible requests | Current request is limited to 16,000 characters and up to 99 prior messages; sidebar keeps up to 12 recent chats |
-| Saved profile and memory | Settings entered by user | Included in requests only when the “use saved details” setting is enabled | Contact and health details are rejected by profile validation; cache is bypassed for requests using profile details |
-| Preferences | Theme, language, tone, answer length, memory-sharing switch | Streamlit session; with account memory, persisted alongside the account row | English remains the default until the user chooses another language |
-| Model request settings | `config.py`, evaluation job, or user preference within bounds | Groq generation parameters and cache identity | Temperature, `top_p`, and token limits are bounded/configured; longer output can still be truncated |
-| Structured model response | Groq | Parsed as the chat/plan schema, screened, then rendered | Invalid or incomplete output can be withheld or repaired; validation does not verify truth |
-| Feedback vote | UI button | Local JSONL feedback file | Stores minimal vote metadata, not the full answer or submitted sport/health text |
-| Evaluation case/output | Synthetic or student-supplied case; Groq response if executed | Private ignored `eval/results/` checkpoints and CSVs | Review and anonymize before publishing; raw cases and outputs are not shipped as evidence |
-| Google sign-in identity | OpenID Connect provider | Verified identity subject is hashed to scope the account record | Google, not CoachBot, collects the Gmail password |
-| Supabase account row | Server-side application | Recent chats, profile and preferences for a hashed account key | The server secret is private and bypasses RLS; trusted application code must enforce account scoping |
-| API credentials | App owner | Private `.streamlit/secrets.toml` or Streamlit Cloud secrets | Real secrets are ignored by Git and must never be pasted into README, screenshots, or commits |
+---
 
-### Account memory lifecycle
+<div align="center">
 
-1. If OpenID Connect is configured, Streamlit verifies the signed-in identity.
-2. CoachBot hashes the identity subject and uses that derived key for its account row.
-3. The app loads the row, validates its shape, and merges it with session state so unsynced local changes are not silently discarded.
-4. Chat history, saved profile, and preferences are serialized and upserted when Supabase is configured.
-5. Selected recent conversation turns can be included with a new message to support follow-up questions. Saved profile details are included only when the user's memory-sharing setting is enabled.
+**CoachBot gives general training education, not medical advice.** For pain, injury or return-to-play decisions, talk to a doctor, physiotherapist or qualified coach.
 
-Without Google OpenID Connect and Supabase configuration, local preview is session-only; it is not secure account login and does not give durable cross-session history. The Supabase service key is powerful: keep it server-side and scope all reads/writes to the derived account key.
+⚡ Built with Streamlit · Google Gemini · Three.js · Plotly · GSAP
 
-## Safety and response logic
-
-1. **Normalize and inspect input locally.** The preflight checks for injury/urgent symptoms, unsafe requested actions, unsupported personal health quantities, and missing/invalid form fields.
-2. **Choose a local route or model route.** Injury, urgent-symptom, and disallowed health requests return fixed application guidance and do not call Groq. Eligible sports/wellness requests continue.
-3. **Build the prompt.** The request carries the chosen response language, bounded settings, user message, and limited history; saved profile is attached only if enabled.
-4. **Request structured output.** The Groq Chat Completions call requests JSON following the English-key schema. Model language can change, while keys/status values remain stable for parsing.
-5. **Validate and screen.** Pydantic validates types, required fields and allowed values. Limited output checks may withhold suspect/incomplete content. A repair phase is bounded; failed or truncated advice is not treated as complete.
-6. **Render.** The formatter displays a conversational answer or plan cards with rationales. A Markdown export is produced only when explicitly requested.
-
-The screening uses rules and patterns; it can miss paraphrases, context, or unsafe non-English text and can flag benign text. It is a prototype guardrail, not medical clearance or expert review.
-
-## Model, parameters, cache and evaluation
-
-The app uses Groq's OpenAI-compatible Chat Completions endpoint via `requests`. The current default model string is `openai/gpt-oss-20b`; run `check_models.py` with your own key to see whether your account can access it. The model name in configuration is not proof that account access, quota or all parameters are available.
-
-| Setting | Configured behavior |
-|---|---|
-| Response contract | `ChatResponse` for chat; `CoachingResponse` and nested recommendations for structured plans |
-| Rationale | A short rationale is required for each recommendation and shown under the suggestion |
-| Schema keys/status | English, even when the response language is changed |
-| Timeout | 30 seconds per HTTP request |
-| Retries/repair | Bounded attempts, one repair phase, and a shared call budget; worst case per job is capped |
-| Response cache | Disk cache identity includes model, request, prompt/policy/schema versions, parameters, language and constraints; a matching hit costs zero provider calls |
-| Eval grid | 3 temperatures × 2 `top_p` values × 3 `max_tokens` values = 18 configurations per case |
-| Synthetic set | 8 cases create 144 jobs: 90 local checks and 54 model-eligible jobs |
-| Estimated calls | 54 first-attempt calls if all eligible jobs are uncached and succeed once; theoretical ceiling 324 with retry/repair attempts. The runner's call budget can cap actual use. |
-| Evaluation outputs | Checkpoints, `runs.jsonl`, `summary.csv` and `tuning.csv` record call state, lengths/tokens, truncation and structural completeness |
-
-Run a zero-call plan before an evaluation. `--subset` selects jobs, not cases. Checkpoints allow resuming after rate limits, and identical cached requests cost zero calls. Changed inputs/model/prompt/code may require new calls. These mechanics estimate cost; they do not measure answer quality. The 5-criterion quality rubric is intentionally unscored for the student to complete.
-
-## Quick start
-
-Use Python 3.13 for the recorded local environment. From the project root:
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-Copy-Item .streamlit\secrets.toml.example .streamlit\secrets.toml
-```
-
-Add your key in the private `.streamlit/secrets.toml` file:
-
-```toml
-[groq]
-api_key = "YOUR_GROQ_API_KEY"
-```
-
-Then start CoachBot:
-
-```powershell
-.\.venv\Scripts\python.exe -m streamlit run app.py
-```
-
-For account sign-in and cross-session memory, see [Google OpenID Connect](https://docs.streamlit.io/develop/concepts/connections/authentication) and configure the optional Supabase section with the private Project URL/server secret. Run [`supabase/setup.sql`](supabase/setup.sql) once in the Supabase SQL Editor. Local secrets are not uploaded to Streamlit Cloud automatically; configure Cloud secrets separately when deploying.
-
-## Evaluation and notebook
-
-Offline checks:
-
-```powershell
-.\.venv\Scripts\python.exe -m unittest discover -s tests -v
-```
-
-Dry-run the evaluation planner first; it makes no Groq calls:
-
-```powershell
-.\.venv\Scripts\python.exe -m eval.eval_runner --subset 3
-```
-
-Execute a deliberately small subset only after reviewing the planned call estimate:
-
-```powershell
-.\.venv\Scripts\python.exe -m eval.eval_runner --subset 3 --max-calls 3 --sleep 2 --execute
-```
-
-Use `--retry-failed --execute` to resume transient failures while preserving completed results. Results are written under ignored `eval/results/`. The companion notebook is [`notebooks/exploration.ipynb`](notebooks/exploration.ipynb); it imports the shared implementation in `core/` rather than duplicating the client.
-
-## Evidence and coursework placeholders
-
-Implementation and student evaluation are different evidence. Existing offline tests and one synthetic local smoke check do not establish quality, safety, a live deployment, or student research. Before submission, complete the required screenshots and your own assessment content.
-
-- [Numbered screenshot checklist and exact README locations](docs/EVIDENCE_PLAN.md)
-- [Unscored five-criterion output-quality rubric](docs/EVAL_CASE_CHECKLIST.md)
-- [Prompt authoring worksheet](docs/PROMPT_AUTHORING.md)
-- [Stage-by-stage implementation records](STAGE_1.md)
-- [Editable submission cover template](submission/cover_page.md)
-- [PDF cover template](submission/cover_page.pdf)
-
-Pending student inputs remain explicit. Do not claim research, prompt authorship, model-quality results, human feedback, or reflection until you have completed and documented that work yourself. The repository should be reviewed in a logged-out browser, and `ai.assignments@wacpinternational.org` should be added as a collaborator for submission.
-
-## Known limits and project status
-
-- One worked registry prompt exists; the other nine assessment prompt slots are still student work.
-- Language selection and English schema keys are implemented, but translation quality has not been evaluated.
-- English-pattern safety checks may not recognize equivalent risks in other languages.
-- The app's settings and themes are implemented locally; live Google/Supabase behavior requires the owner's private configuration.
-- The configured model must be checked with the owner's own Groq account.
-- A schema-valid answer can still be inaccurate, incomplete, or unsuitable.
-- Streamlit Cloud deployment and real user/expert evaluation must be independently verified before claiming them.
-
-## Repository contents
-
-```text
-app.py                  Streamlit entry point
-config.py               Defaults, model, generation and evaluation settings
-core/                   Groq client, schemas, safety, prompts and formatter
-ui/                     Chat, settings, account memory, authentication and theme
-eval/                   Synthetic cases and resumable evaluation runner
-notebooks/              Exploration notebook using core/
-tests/                  Offline engineering tests
-docs/                   Evidence plan, checklists and authoring guides
-supabase/setup.sql      Account-memory database setup
-submission/             Student cover-page template artifacts
-```
-
-Private credentials, `.cache/`, local `data/`, generated evaluation results, Python caches and virtual environments are excluded from Git. See [`.gitignore`](.gitignore).
+</div>

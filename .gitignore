@@ -1,25 +1,18 @@
-# Credentials: commit examples only.
+# Secrets
 .streamlit/secrets.toml
 **/secrets.toml
 .env
 .env.*
-!.env.example
-*.pem
-*.key
 
-# Local Python environment and generated files.
+# Python
 .venv/
 venv/
 __pycache__/
 *.py[cod]
 .pytest_cache/
 .ipynb_checkpoints/
+
+# Runtime logs (sample evidence lives in eval/results/)
+logs/
 .DS_Store
 Thumbs.db
-
-# Inputs, model responses and feedback may contain personal information.
-.cache/
-data/
-eval/results/*
-!eval/results/.gitkeep
-# Publish only manually reviewed, anonymized evidence under docs/evidence/.
