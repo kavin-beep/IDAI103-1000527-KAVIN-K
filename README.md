@@ -15,7 +15,7 @@
 <img src="https://img.shields.io/badge/tests-38%20passing-C6FF3D">
 <img src="https://img.shields.io/badge/Scenario-2%20·%20Smart%20Fitness-9D7BFF">
 
-**[▶ Live app](#-run-it)** · **[🌐 Landing site](https://kavin-beep.github.io/GENAI-SA/)** · **[📚 Prompts](research/PROMPTS.md)** · **[🔬 Research](research/RESEARCH.md)** · **[🧪 Validation](research/VALIDATION.md)** · **[📓 Notebook](notebooks/coachbot_exploration.ipynb)**
+**Streamlit Link:*** https://genai-sa-d5xf9uwvu3jjfyur9fns9y.streamlit.app/
 
 </div>
 
